@@ -3,64 +3,66 @@ import pandas as pd
 from sklearn.model_selection import train_test_split, cross_val_score
 from sklearn.linear_model import LinearRegression
 
-    #Inicializa o modelo
+#Inicializa o modelo
 class RegressaoLinearModelo:
     def __init__(self):
-        self.df = None
-        self.model = None
-        self.X_train = None
-        self.X_test = None
-        self.y_train = None
-        self.y_test = None
+        self.dados = None
+        self.modelo = None
+        self.dados_treino = None
+        self.dados_teste = None
+        self.respostas_treino = None
+        self.respostas_teste = None
 
     def CarregarDataset(self, path):
         try:
             #Carrega o dataset Iris
-            names = ['SepalLengthCm', 'SepalWidthCm', 'PetalLengthCm', 'PetalWidthCm', 'Species']
-            self.df = pd.read_csv(path, names=names, header=None) 
-        except Exception as e:
-            print(f"Erro ao carregar o dataset: {e}")
+            colunas = ['ComprimentoSepala', 'LarguraSepala', 'ComprimentoPetala', 'LarguraPetala', 'Especie']
+            self.dados = pd.read_csv(path, names=colunas, header=None)
+        except Exception as erro:
+            print(f"Erro ao carregar o dataset: {erro}")
 
     def TratamentoDeDados(self):
         #Verifica valores ausentes
-        if self.df.isnull().sum().any():
-            self.df = self.df.dropna()
+        if self.dados.isnull().sum().any():
+            self.dados = self.dados.dropna()
 
-        #Codifica a coluna Species
-        species_mapping = {species: idx for idx, species in enumerate(self.df['Species'].unique())}
-        self.df['Species'] = self.df['Species'].map(species_mapping)
+        #Codifica a coluna Especie
+        mapeamento_especies = {especie: indice for indice, especie in enumerate(self.dados['Especie'].unique())}
+        self.dados['Especie'] = self.dados['Especie'].map(mapeamento_especies)
 
     def Treinamento(self):
         #Divide os dados em treino e teste
-        X = self.df[['SepalLengthCm', 'SepalWidthCm', 'PetalLengthCm', 'PetalWidthCm']]
-        y = self.df['Species']
-        self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+        atributos = self.dados[['ComprimentoSepala', 'LarguraSepala', 'ComprimentoPetala', 'LarguraPetala']]
+        respostas = self.dados['Especie']
+        self.dados_treino, self.dados_teste, self.respostas_treino, self.respostas_teste = train_test_split(
+            atributos, respostas, test_size=0.2, random_state=42
+        )
 
         #Treinamento com Regressão Linear
-        self.model = LinearRegression()
+        self.modelo = LinearRegression()
 
         #Validação cruzada
-        scores = cross_val_score(self.model, self.X_train, self.y_train, cv=5, scoring='r2')
-        print(f"Validação cruzada (média de acurácia) = {scores.mean():.2f}")
+        validacao = cross_val_score(self.modelo, self.dados_treino, self.respostas_treino, cv=5, scoring='r2')
+        print(f"Validação cruzada (média de acurácia) = {validacao.mean():.2f}")
 
         #Treina o modelo
-        self.model.fit(self.X_train, self.y_train)
+        self.modelo.fit(self.dados_treino, self.respostas_treino)
 
     def Teste(self):
         #Avalia o modelo nos dados de teste
-        r2_score = self.model.score(self.X_test, self.y_test)
-        print(f"Desempenho da regressão linear (acurácia) = {r2_score:.2f}")
+        r2 = self.modelo.score(self.dados_teste, self.respostas_teste)
+        print(f"Desempenho da regressão linear (acurácia) = {r2:.2f}")
 
-    #Chama as funções
+    #Chamada das funções
     def Train(self, path):
         self.CarregarDataset(path)
-        if self.df is not None:
+        if self.dados is not None:
             self.TratamentoDeDados()
             self.Treinamento()
             self.Teste()
 
-    #Chama a função Train
+#Chama a função Train
 if __name__ == "__main__":
-    caminho_dataset = "dados/iris.data" 
+    caminho_dataset = "dados/iris.data"
     modelo = RegressaoLinearModelo()
     modelo.Train(caminho_dataset)
