@@ -18,20 +18,17 @@ class RegressaoLinearModelo:
             #Carrega o dataset Iris
             names = ['SepalLengthCm', 'SepalWidthCm', 'PetalLengthCm', 'PetalWidthCm', 'Species']
             self.df = pd.read_csv(path, names=names, header=None) 
-            print("Dataset carregado com sucesso!")
         except Exception as e:
             print(f"Erro ao carregar o dataset: {e}")
 
     def TratamentoDeDados(self):
         #Verifica valores ausentes
         if self.df.isnull().sum().any():
-            print("Dados com valores ausentes encontrados. Removendo linhas com valores ausentes...")
             self.df = self.df.dropna()
 
         #Codifica a coluna Species
         species_mapping = {species: idx for idx, species in enumerate(self.df['Species'].unique())}
         self.df['Species'] = self.df['Species'].map(species_mapping)
-        print("Dados tratados com sucesso!")
 
     def Treinamento(self):
         #Divide os dados em treino e teste
@@ -48,7 +45,6 @@ class RegressaoLinearModelo:
 
         #Treina o modelo
         self.model.fit(self.X_train, self.y_train)
-        print("Modelo treinado com sucesso!")
 
     def Teste(self):
         #Avalia o modelo nos dados de teste
